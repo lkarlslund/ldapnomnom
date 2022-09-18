@@ -1,5 +1,5 @@
 # LDAP Nom Nom
-Bruteforce Active Directory usernames from Domain Controllers by abusing anonymous LDAP Ping requests (cLDAP) - tests 10K usernames/sec on normal high speed network
+Anonymously bruteforce Active Directory usernames from Domain Controllers by abusing LDAP Ping requests (cLDAP)
 
 - Autodetects DCs on domain joined machines. A bit moot, as you can just dump usernames with authenticated LDAP, but included for completeness
 - Reads usernames to test from stdin or file
@@ -9,7 +9,7 @@ Bruteforce Active Directory usernames from Domain Controllers by abusing anonymo
 
 Installation, requires Go:
 ```
-go install github.com/lkarlslund/ldapnomnom
+go install github.com/lkarlslund/ldapnomnom@latest
 ```
 
 Usage
