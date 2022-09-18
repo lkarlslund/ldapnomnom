@@ -12,7 +12,6 @@ import (
 	"sync"
 
 	"github.com/Showmax/go-fqdn"
-	"github.com/lkarlslund/adalanche/modules/ui"
 	"github.com/lkarlslund/ldap/v3"
 	"github.com/schollz/progressbar/v3"
 )
@@ -94,7 +93,7 @@ func main() {
 	var domain string
 	if *server == "" {
 		// We only need to auto-detect the domain if the server is not supplied
-		ui.Info().Msg("No server supplied, auto-detecting")
+		log.Println("No server supplied, auto-detecting")
 		domain = strings.ToLower(os.Getenv("USERDNSDOMAIN"))
 		if domain == "" {
 			// That didn't work, lets try something else
