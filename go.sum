@@ -1,0 +1,4 @@
+github.com/lkarlslund/ldap v2.5.1+incompatible h1:LoXsw53P3/Nb9GuI1+pEYRhiYY1fIoVUxokF4Wzs07w=
+github.com/lkarlslund/ldap v2.5.1+incompatible/go.mod h1:xnBcrW3XQXvEhjJRTyL5Ty+2jE5mwvEQG0Z++cm+s+c=
+gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d h1:TxyelI5cVkbREznMhfzycHdkp5cLA7DpE+GKjSslYhM=
+gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d/go.mod h1:cuepJuh7vyXfUyUwEgHQXw849cJrilpS5NeIjOWESAw=
