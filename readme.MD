@@ -3,7 +3,7 @@ Anonymously bruteforce Active Directory usernames from Domain Controllers by abu
 
 - Autodetects DCs on domain joined machines. A bit moot, as you can just dump usernames with authenticated LDAP, but included for completeness
 - Reads usernames to test from stdin or file
-- Outputs to stdin or file
+- Outputs to stdout or file
 - Parallelized, defaults to 8 connections
 - Shows progressbar if you're using both input and output files
 
