@@ -40,7 +40,7 @@ Look for username lists to feed into this elsewhere - for instance the 10M list 
 
 ## History
 
-During a discussion on Twitter about locating Kerberos services, someone hinted the existance of LDAP Ping requests. They're documented on (Microsofts Open Specifications Pages)[https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/895a7744-aff3-4f64-bcfa-f8c05915d2e9], and it contains pseudo code for how you initiate a LDAP Ping, what parameters it takes and the data returned. It immediately seemed obvious that there is an information leak here that can be abused.
+During a discussion on Twitter about locating Kerberos services, someone hinted the existance of LDAP Ping requests. They're documented on [Microsofts Open Specifications Pages](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/895a7744-aff3-4f64-bcfa-f8c05915d2e9), and it contains pseudo code for how you initiate a LDAP Ping, what parameters it takes and the data returned. It immediately seemed obvious that there is an information leak here that can be abused.
 
 After having released the tool, I can see I'm not the only one to spot this "mistake" which is clearly still around for historic backwards compatibility reasons.
 
