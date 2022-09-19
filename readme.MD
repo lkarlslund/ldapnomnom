@@ -10,6 +10,7 @@ No Windows audit logs generated. High speed ~ up to 10K usernames tested per sec
 - Outputs to stdout (default) or file
 - Parallelized (defaults to 8 connections)
 - Shows progressbar if you're using both input and output files
+- Runs on any Go supported platform (prebuilt binaries for Windows, Linux and OSX)
 
 ### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command:
 ```
@@ -18,11 +19,13 @@ go install github.com/lkarlslund/ldapnomnom@latest
 
 ### Usage
 ```
-ldapnomnom [--server ipaddress] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections]
+ldapnomnom [--server address | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections]
 ```
-### Example
+### Examples
 ```
 ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 --parallel 16
+
+echo administrator | ldapnomnom --output contoso_lolwut.txt --dnsdomain contoso.com --port 636 --tlsmode tls
 ```
 
 Look for username lists to feed into this elsewhere - for instance the 10M list from [here](https://github.com/danielmiessler/SecLists/tree/master/Usernames)
