@@ -135,11 +135,22 @@ func main() {
 	inputqueue := make(chan string, 128)
 	outputqueue := make(chan string, 128)
 
+	var connectMutex sync.Mutex
+	var connectError error
+
 	var jobs sync.WaitGroup
 
 	jobs.Add(*parallel)
 	for i := 0; i < *parallel; i++ {
 		go func() {
+			connectMutex.Lock()
+
+			if connectError != nil {
+				connectMutex.Unlock()
+				jobs.Done()
+				return
+			}
+
 			var conn *ldap.Conn
 			switch tlsmode {
 			case NoTLS:
@@ -159,9 +170,13 @@ func main() {
 
 			if err != nil {
 				log.Printf("Problem connecting to LDAP server: %v", err)
+				connectError = err
 				jobs.Done()
+				connectMutex.Unlock()
 				return
 			}
+
+			connectMutex.Unlock()
 
 			for username := range inputqueue {
 				request := ldap.NewSearchRequest(
@@ -196,23 +211,25 @@ func main() {
 		}
 	}()
 
-	var line int
-	for names.Scan() {
-		if pb != nil && line%500 == 0 {
-			pb.Set(line)
-		}
-
-		username := names.Text()
-		if username != "" {
-			if strings.ContainsAny(username, `"/\:;|=,+*?<>`) {
-				continue
+	go func() {
+		var line int
+		for names.Scan() {
+			if pb != nil && line%500 == 0 {
+				pb.Set(line)
 			}
-			inputqueue <- username
-		}
-		line++
-	}
 
-	close(inputqueue)
+			username := names.Text()
+			if username != "" {
+				if strings.ContainsAny(username, `"/\:;|=,+*?<>`) {
+					continue
+				}
+				inputqueue <- username
+			}
+			line++
+		}
+		close(inputqueue)
+	}()
+
 	jobs.Wait()
 	close(outputqueue)
 }
