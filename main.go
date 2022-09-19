@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"strings"
@@ -35,14 +36,15 @@ type NetLogonExResponse struct {
 
 func main() {
 	server := flag.String("server", "", "DC to connect to, use IP or full hostname - will try autodection if not supplied")
+	dnsdomain := flag.String("dnsdomain", "", "Domain to connect to in DNS suffix format - will try autodection if not supplied")
 	port := flag.Int("port", 389, "LDAP port to connect to (389 or 636 typical)")
 	tlsmodeString := flag.String("tlsmode", "NoTLS", "Transport mode (TLS, StartTLS, NoTLS)")
 	ignoreCert := flag.Bool("ignorecert", true, "Disable certificate checks")
 
-	inputname := flag.String("input", "", "file to read usernames from, uses stdin if not supplied")
-	outputname := flag.String("output", "", "file to write detected usernames to, uses stdout if not supplied")
+	inputname := flag.String("input", "", "File to read usernames from, uses stdin if not supplied")
+	outputname := flag.String("output", "", "File to write detected usernames to, uses stdout if not supplied")
 
-	parallel := flag.Int("parallel", 8, "how many connections to run in parallel")
+	parallel := flag.Int("parallel", 8, "How many connections to run in parallel")
 
 	flag.Parse()
 
@@ -90,32 +92,35 @@ func main() {
 	names.Split(bufio.ScanLines)
 
 	// AUTODETECTION
-	var domain string
 	if *server == "" {
 		// We only need to auto-detect the domain if the server is not supplied
-		log.Println("No server supplied, auto-detecting")
-		domain = strings.ToLower(os.Getenv("USERDNSDOMAIN"))
-		if domain == "" {
-			// That didn't work, lets try something else
-			f, err := fqdn.FqdnHostname()
-			if err == nil && strings.Contains(f, ".") {
-				log.Print("No USERDNSDOMAIN set - using machines FQDN as basis")
-				domain = strings.ToLower(f[strings.Index(f, ".")+1:])
+		if *dnsdomain == "" {
+			log.Println("No server supplied, auto-detecting")
+			*dnsdomain = strings.ToLower(os.Getenv("USERDNSDOMAIN"))
+			if *dnsdomain == "" {
+				// That didn't work, lets try something else
+				f, err := fqdn.FqdnHostname()
+				if err == nil && strings.Contains(f, ".") {
+					log.Print("No USERDNSDOMAIN set - using machines FQDN as basis")
+					*dnsdomain = strings.ToLower(f[strings.Index(f, ".")+1:])
+				}
 			}
 		}
-		if domain == "" {
+		if *dnsdomain == "" {
 			log.Fatal("Domain auto-detection failed")
 		} else {
-			log.Printf("Auto-detected domain as %v", domain)
+			log.Printf("Auto-detected domain as %v", dnsdomain)
 		}
 	}
 
 	if *server == "" {
 		// Auto-detect server
-		cname, servers, err := net.LookupSRV("", "", "_ldap._tcp.dc._msdcs."+domain)
+		cname, servers, err := net.LookupSRV("", "", "_ldap._tcp.dc._msdcs."+*dnsdomain)
 		if err == nil && cname != "" && len(servers) != 0 {
-			*server = strings.TrimRight(servers[0].Target, ".")
-			log.Printf("AD controller detected as: %v", *server)
+			log.Printf("Detected %v Domain Controllers for %v", len(servers), *dnsdomain)
+			serverindex := rand.Intn(len(servers))
+			*server = strings.TrimRight(servers[serverindex].Target, ".")
+			log.Printf("Using randomly chosen AD controller %v", *server)
 		} else {
 			log.Fatal("AD controller auto-detection failed, use '--server' parameter")
 		}
