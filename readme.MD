@@ -9,23 +9,23 @@
 - Parallelized (defaults to 8 connections)
 - Shows progressbar if you're using both input and output files
 
-###Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command:
+### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command:
 ```
 go install github.com/lkarlslund/ldapnomnom@latest
 ```
 
-###Usage
+### Usage
 ```
 ldapnomnom [--server ipaddress] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections]
 ```
-###Example
+### Example
 ```
 ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 --parallel 16
 ```
 
 Look for username lists to feed into this elsewhere - for instance the 10M list from [here](https://github.com/danielmiessler/SecLists/tree/master/Usernames)
 
-##History
+## History
 
 During a discussion on Twitter about locating Kerberos services, someone hinted the existance of LDAP Ping requests. They're documented on (Microsofts Open Specifications Pages)[https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/895a7744-aff3-4f64-bcfa-f8c05915d2e9], and it contains pseudo code for how you initiate a LDAP Ping, what parameters it takes and the data returned. It immediately seemed obvious that there is an information leak here that can be abused.
 
