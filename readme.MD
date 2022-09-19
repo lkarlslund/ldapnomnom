@@ -1,6 +1,7 @@
 # LDAP Nom Nom
 *Anonymously bruteforce Active Directory usernames from Domain Controllers by abusing LDAP Ping requests (cLDAP)*
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/lkarlslund/ldapnomnom)](https://github.com/lkarlslund/ldapnomnom/releases/latest) ![GitHub all releases](https://img.shields.io/github/downloads/lkarlslund/ldapnomnom/total) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lkarlslund/ldapnomnom/Build%20and%20publish%20pre-release)
+
+[![GitHub all releases](https://img.shields.io/github/downloads/lkarlslund/ldapnomnom/total)](https://github.com/lkarlslund/ldapnomnom/releases) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lkarlslund/ldapnomnom/Build%20and%20publish%20pre-release)
 
 - Tries to autodetects DC from environment variables on domain joined machines or falls back to machine hostname FDQN DNS suffix
 - Reads usernames to test from stdin (default) or file
