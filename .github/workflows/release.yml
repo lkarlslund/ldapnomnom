@@ -1,0 +1,36 @@
+name: Build and publish release
+
+on:
+  push:
+    tags: [ "*.*.*" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.19
+
+    - name: Build
+      run: ./build.ps1
+      shell: pwsh
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Binaries
+        path: binaries/*
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        prerelease: false
+        files: |
+          binaries/*
