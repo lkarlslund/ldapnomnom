@@ -9,7 +9,7 @@ No Windows audit logs generated. High speed ~ up to 10K usernames tested per sec
 - Tries to autodetect DC from environment variables on domain joined machines or falls back to machine hostname FQDN DNS suffix
 - Reads usernames to test from stdin (default) or file
 - Outputs to stdout (default) or file
-- Parallelized (defaults to 8 connections)
+- Parallelized, multiple connections to multiple servers (defaults to 8 servers, 8 connections per server)
 - Shows progressbar if you're using both input and output files
 
 ### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command
@@ -21,13 +21,19 @@ go install github.com/lkarlslund/ldapnomnom@latest
 ### Usage
 
 ```bash
-ldapnomnom [--server ipaddress] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections]
+ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random]
 ```
 
-### Example
+### Examples
 
+Connect to up to 32 servers from contoso.local with 16 connections to each - FAAAAAAAST
 ```bash
-ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 --parallel 16
+ldapnomnom --input 10m_usernames.txt --output multiservers.txt --dnsdomain contoso.local --maxservers 32 --parallel 16
+```
+
+Connect to one named server with 4 connections
+```bash
+ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 --parallel 4
 ```
 
 Look for username lists to feed into this elsewhere - for instance the 10M list from [here](https://github.com/danielmiessler/SecLists/tree/master/Usernames)
