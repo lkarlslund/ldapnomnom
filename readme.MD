@@ -1,42 +1,49 @@
 # LDAP Nom Nom
+
 *Anonymously bruteforce Active Directory usernames from Domain Controllers by abusing LDAP Ping requests (cLDAP)*
 
 No Windows audit logs generated. High speed ~ up to 10K usernames tested per second.
 
 [![GitHub all releases](https://img.shields.io/github/downloads/lkarlslund/ldapnomnom/total)](https://github.com/lkarlslund/ldapnomnom/releases) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lkarlslund/ldapnomnom/Build%20and%20publish%20pre-release)
 
-- Tries to autodetect DC from environment variables on domain joined machines or falls back to machine hostname FDQN DNS suffix
+- Tries to autodetect DC from environment variables on domain joined machines or falls back to machine hostname FQDN DNS suffix
 - Reads usernames to test from stdin (default) or file
 - Outputs to stdout (default) or file
 - Parallelized (defaults to 8 connections)
 - Shows progressbar if you're using both input and output files
 
-### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command:
-```
+### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command
+
+```go
 go install github.com/lkarlslund/ldapnomnom@latest
 ```
 
 ### Usage
-```
+
+```bash
 ldapnomnom [--server ipaddress] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections]
 ```
+
 ### Example
-```
+
+```bash
 ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 --parallel 16
 ```
 
 Look for username lists to feed into this elsewhere - for instance the 10M list from [here](https://github.com/danielmiessler/SecLists/tree/master/Usernames)
 
 ## Detection
+
 - No Windows event logs are generated (tested on Windows 2016 / 2019)
 - Requires custom network level monitoring (unencrypted LDAP analysis or traffic volume for LDAPS)
 
 ## Mitigation
--  None, this is part of the dcLocator stuff
--  Rename your administrator account
--  Audit accounts for having same password as the username
--  Prevent kerberoasting by removing SPNs on as many accounts as possible
--  Use long and complex passwords on accounts with SPNs
+
+- None, this is part of the dcLocator stuff
+- Rename your administrator account
+- Audit accounts for having same password as the username
+- Prevent kerberoasting by removing SPNs on as many accounts as possible
+- Use long and complex passwords on accounts with SPNs
 
 ## History
 
