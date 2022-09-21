@@ -2,7 +2,7 @@
 
 *Anonymously bruteforce Active Directory usernames from Domain Controllers by abusing LDAP Ping requests (cLDAP)*
 
-No Windows audit logs generated. High speed ~ up to 10K usernames/server/second - way faster with multiple servers!
+Looks for enabled normal user accounts. No Windows audit logs generated. High speed ~ up to 10K/sec - go beyond 25K/sec with multiple servers!
 
 [![GitHub all releases](https://img.shields.io/github/downloads/lkarlslund/ldapnomnom/total)](https://github.com/lkarlslund/ldapnomnom/releases) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lkarlslund/ldapnomnom/Build%20and%20publish%20pre-release)
 
@@ -42,6 +42,7 @@ Look for username lists to feed into this elsewhere - for instance the 10M list 
 
 - No Windows event logs are generated (tested on Windows 2016 / 2019)
 - Requires custom network level monitoring (unencrypted LDAP analysis or traffic volume for LDAPS)
+- One user has reported sandbox detection by LDAP query volume
 
 ## Mitigation
 

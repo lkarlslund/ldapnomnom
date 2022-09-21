@@ -13,10 +13,11 @@ function BuildVariants {
     foreach ($currentos in $os) {
       $env:GOARCH = $currentarch
       $env:GOOS = $currentos
-      go build -ldflags "$ldflags" -o binaries/$prefix-$currentos-$currentarch$suffix.exe $compileflags $path
+      $outputfile = binaries/$prefix-$currentos-$currentarch$suffix
+      go build -ldflags "$ldflags" -o $outputfile $compileflags $path
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
-        cyclonedx-gomod app -json -licenses -output binaries/$prefix-$currentos-$currentarch$suffix.bom.json -main $path .
+        cyclonedx-gomod app -json -licenses -output $outputfile.bom.json -main $path .
       }
     }
   }
