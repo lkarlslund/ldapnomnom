@@ -46,6 +46,10 @@ func main() {
 	inputname := flag.String("input", "", "File to read usernames from, uses stdin if not supplied")
 	outputname := flag.String("output", "", "File to write detected usernames to, uses stdout if not supplied")
 
+	// evasive maneuvers
+	throttle := flag.Int("throttle", 0, "Only do a request every N ms, 0 to disable")
+	maxrequests := flag.Int("maxrequests", 0, "Disconnect and reconnect a connection after n requests, 0 to disable")
+
 	maxservers := flag.Int("maxservers", 8, "Maximum amount of servers to run in parallel")
 	maxstrategy := flag.String("maxstrategy", "fastest", "How to select servers if more are found than wanted (fastest, random)")
 	parallel := flag.Int("parallel", 8, "How many connections per server to run in parallel")
@@ -242,68 +246,92 @@ func main() {
 
 	var jobs sync.WaitGroup
 
+	var throttleTimer *time.Ticker
+	if *throttle > 0 {
+		throttleTimer = time.NewTicker(time.Millisecond * time.Duration(*throttle))
+	}
+
 	jobs.Add(*parallel * len(servers))
 	for _, server := range servers {
 		for i := 0; i < *parallel; i++ {
 			go func(server string) {
-				connectMutex.Lock()
-
-				if connectError != nil {
-					connectMutex.Unlock()
-					jobs.Done()
-					return
-				}
-
-				var conn *ldap.Conn
-				switch tlsmode {
-				case NoTLS:
-					conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
-				case StartTLS:
-					conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
-					if err == nil {
-						err = conn.StartTLS(&tls.Config{ServerName: server})
+				var requests int
+			reconnectLoop:
+				for {
+					connectMutex.Lock()
+					if connectError != nil {
+						connectMutex.Unlock()
+						jobs.Done()
+						return
 					}
-				case TLS:
-					config := &tls.Config{
-						ServerName:         server,
-						InsecureSkipVerify: *ignoreCert,
+
+					var conn *ldap.Conn
+					switch tlsmode {
+					case NoTLS:
+						conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
+					case StartTLS:
+						conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
+						if err == nil {
+							err = conn.StartTLS(&tls.Config{ServerName: server})
+						}
+					case TLS:
+						config := &tls.Config{
+							ServerName:         server,
+							InsecureSkipVerify: *ignoreCert,
+						}
+						conn, err = ldap.DialTLS("tcp", fmt.Sprintf("%s:%d", server, *port), config)
 					}
-					conn, err = ldap.DialTLS("tcp", fmt.Sprintf("%s:%d", server, *port), config)
-				}
 
-				if err != nil {
-					log.Printf("Problem connecting to LDAP %v server: %v", server, err)
-					connectError = err
-					jobs.Done()
-					connectMutex.Unlock()
-					return
-				}
-
-				connectMutex.Unlock()
-
-				for username := range inputqueue {
-					request := ldap.NewSearchRequest(
-						"", // The base dn to search
-						ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
-						fmt.Sprintf("(&(NtVer=\x06\x00\x00\x00)(AAC=\x10\x00\x00\x00)(User="+username+"))"), // The filter to apply
-						[]string{"NetLogon"}, // A list attributes to retrieve
-						nil,
-					)
-					response, err := conn.Search(request)
 					if err != nil {
-						if v, ok := err.(*ldap.Error); ok && v.ResultCode == 201 {
+						log.Printf("Problem connecting to LDAP %v server: %v", server, err)
+						connectError = err
+						jobs.Done()
+						connectMutex.Unlock()
+						return
+					}
+
+					connectMutex.Unlock()
+
+					for username := range inputqueue {
+						// do throttling if needed
+						if throttleTimer != nil {
+							<-throttleTimer.C
+						}
+
+						request := ldap.NewSearchRequest(
+							"", // The base dn to search
+							ldap.ScopeBaseObject, ldap.NeverDerefAliases, 0, 0, false,
+							fmt.Sprintf("(&(NtVer=\x06\x00\x00\x00)(AAC=\x10\x00\x00\x00)(User="+username+"))"), // The filter to apply
+							[]string{"NetLogon"}, // A list attributes to retrieve
+							nil,
+						)
+						response, err := conn.Search(request)
+						if err != nil {
+							if v, ok := err.(*ldap.Error); ok && v.ResultCode == 201 {
+								continue
+							}
+							log.Printf("failed to execute search request: %v", err)
 							continue
 						}
-						log.Printf("failed to execute search request: %v", err)
-						continue
-					}
 
-					// Did we catch something?
-					res := response.Entries[0].Attributes[0].ByteValues[0]
-					if len(res) > 2 && res[0] == 0x17 && res[1] == 00 {
-						outputqueue <- username
+						// Did we catch something?
+						res := response.Entries[0].Attributes[0].ByteValues[0]
+						if len(res) > 2 && res[0] == 0x17 && res[1] == 00 {
+							outputqueue <- username
+						}
+
+						// Should we start a new connection to avoid detection
+						requests++
+						if *maxrequests != 0 && requests == *maxrequests {
+							requests = 0
+							conn.Close()
+							continue reconnectLoop
+						}
 					}
+					// No more input in channel, bye bye from this worker
+					break
 				}
+
 				jobs.Done()
 			}(server)
 		}

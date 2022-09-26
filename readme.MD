@@ -11,6 +11,8 @@ Looks for enabled normal user accounts. No Windows audit logs generated. High sp
 - Outputs to stdout (default) or file
 - Parallelized, multiple connections to multiple servers (defaults to 8 servers, 8 connections per server)
 - Shows progressbar if you're using both input and output files
+- Evasive maneuvers: Use --throttle 20 for a 20ms delay between each request (slows everything down to a crawl)
+- Evasive maneuvers: Use --maxrequests 1000 to close connection and reconnect after 1000 requests in each connection (try to avoid detection based on traffic volume)
 
 ### Download auto built binaries from [releases](https://github.com/lkarlslund/ldapnomnom/releases) or build and install with this Go command
 
@@ -21,7 +23,7 @@ go install github.com/lkarlslund/ldapnomnom@latest
 ### Usage
 
 ```bash
-ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random]
+ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random] [--throttle n] [--maxrequests n]
 ```
 
 ### Examples
@@ -42,7 +44,6 @@ Look for username lists to feed into this elsewhere - for instance the 10M list 
 
 - No Windows event logs are generated (tested on Windows 2016 / 2019)
 - Requires custom network level monitoring (unencrypted LDAP analysis or traffic volume for LDAPS)
-- One user has reported sandbox detection by LDAP query volume
 
 ## Mitigation
 
