@@ -70,6 +70,7 @@ func main() {
 			log.Fatalf("Could not create %v: %v", *outputname, err)
 		}
 	}
+	defer output.Close()
 
 	var pb *progressbar.ProgressBar
 	input := os.Stdin
