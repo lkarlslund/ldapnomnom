@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -45,6 +46,8 @@ func main() {
 
 	inputname := flag.String("input", "", "File to read usernames from, uses stdin if not supplied")
 	outputname := flag.String("output", "", "File to write detected usernames to, uses stdout if not supplied")
+
+	dumpDSE := flag.Bool("dump", false, "Just dump the rootDSE, no bruteforcing")
 
 	// evasive maneuvers
 	throttle := flag.Int("throttle", 0, "Only do a request every N ms, 0 to disable")
@@ -237,6 +240,63 @@ func main() {
 
 	if len(servers) == 0 {
 		log.Fatal("missing AD controller server name - please provide this on commandline")
+	}
+
+	if *dumpDSE {
+		type response struct {
+			Server   string
+			Error    string              `json:",omitempty"`
+			Response map[string][]string `json:",omitempty"`
+		}
+
+		var responses []response
+
+		for _, server := range servers {
+			var conn *ldap.Conn
+			switch tlsmode {
+			case NoTLS:
+				conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
+			case StartTLS:
+				conn, err = ldap.Dial("tcp", fmt.Sprintf("%s:%d", server, *port))
+				if err == nil {
+					err = conn.StartTLS(&tls.Config{ServerName: server})
+				}
+			case TLS:
+				config := &tls.Config{
+					ServerName:         server,
+					InsecureSkipVerify: *ignoreCert,
+				}
+				conn, err = ldap.DialTLS("tcp", fmt.Sprintf("%s:%d", server, *port), config)
+			}
+
+			if err != nil {
+				log.Printf("Problem connecting to LDAP %v server: %v", server, err)
+				continue
+			}
+
+			result, err := dumpRootDSE(conn)
+
+			nr := response{
+				Server:   server,
+				Response: result,
+			}
+			if err != nil {
+				nr.Error = err.Error()
+			}
+			responses = append(responses, nr)
+			conn.Close()
+		}
+
+		// all done
+		js, _ := json.Marshal(responses)
+
+		// sort JSON, stupid hack but it works
+		var ifce any
+		json.Unmarshal(js, &ifce)
+		js, _ = json.MarshalIndent(ifce, "", "  ")
+
+		output.Write(js)
+		return
 	}
 
 	inputqueue := make(chan string, 128)

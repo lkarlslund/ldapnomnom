@@ -26,7 +26,7 @@ go install github.com/lkarlslund/ldapnomnom@latest
 ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random] [--throttle n] [--maxrequests n]
 ```
 
-### Examples
+### Bruteforcing examples
 
 Connect to up to 32 servers from contoso.local with 16 connections to each - FAAAAAAAST
 ```bash
@@ -39,6 +39,15 @@ ldapnomnom --input 10m_usernames.txt --output results.txt --server 192.168.0.11 
 ```
 
 Look for username lists to feed into this elsewhere - for instance the 10M list from [here](https://github.com/danielmiessler/SecLists/tree/master/Usernames)
+
+### Extract rootDSE attributes
+
+You can also use LDAP Nom Nom to dump attributes from the rootDSE object, by adding the "--dump" option.
+
+Connect to all servers you can find, and output all readable attributes to JSON:
+```bash
+ldapnomnom --output rootDSEs.json --dump
+```
 
 ## Detection
 
