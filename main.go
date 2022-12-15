@@ -120,7 +120,7 @@ func main() {
 		if *dnsdomain == "" {
 			log.Fatal("Domain auto-detection failed")
 		} else {
-			log.Printf("Auto-detected domain as %v", dnsdomain)
+			log.Printf("Auto-detected DNS domain as %v", *dnsdomain)
 			// Auto-detect server
 			cname, dservers, err := net.LookupSRV("", "", "_ldap._tcp.dc._msdcs."+*dnsdomain)
 			if err == nil && cname != "" && len(dservers) != 0 {
