@@ -23,7 +23,7 @@ go install github.com/lkarlslund/ldapnomnom@latest
 ### Usage
 
 ```bash
-ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename [--progressbar]] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random] [--throttle n] [--maxrequests n]
+ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random] [--throttle n] [--maxrequests n]
 ```
 
 ### Bruteforcing examples
