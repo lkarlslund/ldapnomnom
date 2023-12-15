@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -57,7 +59,7 @@ func main() {
 	maxstrategy := flag.String("maxstrategy", "fastest", "How to select servers if more are found than wanted (fastest, random)")
 	parallel := flag.Int("parallel", 8, "How many connections per server to run in parallel")
 
-	log.Println("LDAP Nom Nom - anonymously bruteforce your way to Active Directory usernames")
+	log.Println("LDAP Nom Nom - quietly and anonymously bruteforce your way to Active Directory usernames")
 
 	flag.Parse()
 
@@ -75,9 +77,8 @@ func main() {
 	}
 	defer output.Close()
 
-	var pb *progressbar.ProgressBar
-	input := os.Stdin
 	var pbmax int
+	input := os.Stdin
 	if *inputname != "" {
 		input, err = os.Open(*inputname)
 		if err != nil {
@@ -87,14 +88,26 @@ func main() {
 
 		if *outputname != "" {
 			// Count lines
-			linescanner := bufio.NewScanner(input)
-			linescanner.Split(bufio.ScanLines)
-			var lines int
-			for linescanner.Scan() {
-				lines++
+			stat, _ := input.Stat()
+			pb := progressbar.DefaultBytes(stat.Size())
+			pb.Describe("Counting lines")
+			buf := make([]byte, 128*1024)
+			lineSep := []byte{'\n'}
+			br := bufio.NewReaderSize(input, 16*1024*1024)
+			for {
+				c, err := br.Read(buf)
+				pbmax += bytes.Count(buf[:c], lineSep)
+				pb.Add(c)
+
+				if err == io.EOF {
+					break
+				}
+				if err != nil {
+					log.Fatalf("failed to read from input file: %s", err)
+				}
 			}
-			input.Seek(0, os.SEEK_SET)
-			pbmax = lines
+			input.Seek(0, io.SeekStart)
+			pb.Finish()
 		}
 	}
 
@@ -404,9 +417,10 @@ func main() {
 		}
 	}()
 
+	var pb *progressbar.ProgressBar
 	if pbmax != 0 {
 		pb = progressbar.NewOptions(pbmax,
-			progressbar.OptionSetDescription("Progress"),
+			progressbar.OptionSetDescription("Usernames nom'ed"),
 			progressbar.OptionShowIts(),
 		)
 	}
