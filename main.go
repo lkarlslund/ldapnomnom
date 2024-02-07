@@ -39,6 +39,11 @@ type NetLogonExResponse struct {
 	DomainGUID [16]byte
 }
 
+const banner = ` __    ____  _____ _____                             
+|  |  |    \|  _  |  _  |___ ___ _____ ___ ___ _____ 
+|  |__|  |  |     |   __|   | . |     |   | . |     |
+|_____|____/|__|__|__|  |_|_|___|_|_|_|_|_|___|_|_|_|`
+
 func main() {
 	server := flag.String("server", "", "Comma separated list of DCs to connect to, use IP or full hostname - will try autodection if not supplied")
 	dnsdomain := flag.String("dnsdomain", "", "Domain to connect to in DNS suffix format - will try autodection if not supplied")
@@ -59,7 +64,10 @@ func main() {
 	maxstrategy := flag.String("maxstrategy", "fastest", "How to select servers if more are found than wanted (fastest, random)")
 	parallel := flag.Int("parallel", 8, "How many connections per server to run in parallel")
 
-	log.Println("LDAP Nom Nom - quietly and anonymously bruteforce your way to Active Directory usernames")
+	fmt.Println(banner)
+	fmt.Println()
+	fmt.Println("IN  SPACE  NO  ONE  CAN  HEAR  YOU  NOM  NOM  USERNAMES")
+	fmt.Println()
 
 	flag.Parse()
 
