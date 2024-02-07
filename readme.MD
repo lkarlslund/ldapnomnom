@@ -51,8 +51,9 @@ ldapnomnom --output rootDSEs.json --dump
 
 ## Detection
 
-- No Windows event logs are generated (tested on Windows 2016 / 2019)
-- Requires custom network level monitoring (unencrypted LDAP analysis or traffic volume for LDAPS)
+- Nothing native in the Windows event logs are generated (tested on Windows 2016 / 2019)
+- Microsoft Defender for Identity 2.228 (February 2024) adds [event ID 2437](https://learn.microsoft.com/en-us/defender-for-identity/reconnaissance-discovery-alerts#account-enumeration-reconnaissance-ldap-external-id-2437-preview) and is triggered if the number of failed requests (i.e. wrong guesses at usernames) crosses an unknown threshold
+- Custom network level monitoring (unencrypted LDAP analysis or traffic volume for LDAPS) can also be used, though it's not reliable
 
 ## Mitigation
 
