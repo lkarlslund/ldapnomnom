@@ -1,5 +1,6 @@
 function BuildVariants {
   param (
+    $builder,
     $ldflags,
     $compileflags,
     $prefix,
@@ -25,7 +26,7 @@ function BuildVariants {
         $outputfile += ".exe"
       }
 
-      & $BUILDER build -ldflags "$ldflags" -o $outputfile $compileflags $path
+      $builder build -ldflags "$ldflags" -o $outputfile $compileflags $path
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
         cyclonedx-gomod app -json -licenses -output $outputfile.bom.json -main $path .
@@ -37,8 +38,8 @@ function BuildVariants {
 Set-Location $PSScriptRoot
 
 # Release
-BuildVariants -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux")
+BuildVariants -builder go -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux")
 
-$BUILDER = "garble"
 $env:GOGARBLE="github.com/lkarlslund"
-BuildVariants -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux") -suffix "-obfuscated"
+
+BuildVariants -builder garble -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux") -suffix "-obfuscated"
