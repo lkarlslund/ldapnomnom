@@ -13,10 +13,18 @@ function BuildVariants {
     foreach ($currentos in $os) {
       $env:GOARCH = $currentarch
       $env:GOOS = $currentos
-      $outputfile = "binaries/$prefix-$currentos-$currentarch$suffix"
+
+      # More sensible naming for x64
+      $namearch = $currentarch
+      if ($namearch -eq "amd64") {
+        $namearch = "x64"
+      }
+
+      $outputfile = "binaries/$prefix-$currentos-$namearch$suffix"
       if ($currentos -eq "windows") {
         $outputfile += ".exe"
       }
+
       go build -ldflags "$ldflags" -o $outputfile $compileflags $path
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
