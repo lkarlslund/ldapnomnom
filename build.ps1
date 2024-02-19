@@ -4,7 +4,6 @@ function BuildVariants {
     $ldflags,
     $compileflags,
     $prefix,
-    $suffix,
     $arch,
     $os,
     $path
@@ -21,12 +20,18 @@ function BuildVariants {
         $namearch = "x64"
       }
 
-      $outputfile = "binaries/$prefix-$currentos-$namearch$suffix"
+      $outputfile = "binaries/$prefix-$currentos-$namearch"
       if ($currentos -eq "windows") {
         $outputfile += ".exe"
       }
+      go build -ldflags "$ldflags" -o $outputfile $compileflags $path
 
-      & $builder build -ldflags "$ldflags" -o $outputfile $compileflags $path
+      $outputfile = "binaries/$prefix-$currentos-$namearch-obfuscated"
+      if ($currentos -eq "windows") {
+        $outputfile += ".exe"
+      }
+      garble -send=random -tiny build -ldflags "$ldflags" -o $outputfile $compileflags $path
+
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
         cyclonedx-gomod app -json -licenses -output $outputfile.bom.json -main $path .
@@ -38,8 +43,6 @@ function BuildVariants {
 Set-Location $PSScriptRoot
 
 # Release
-BuildVariants -builder go -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux")
+BuildVariants -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux")
 
 $env:GOGARBLE="github.com/lkarlslund"
-
-BuildVariants -builder garble -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux") -suffix "-obfuscated"
