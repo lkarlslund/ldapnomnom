@@ -25,7 +25,7 @@ function BuildVariants {
         $outputfile += ".exe"
       }
 
-      $BUILDER build -ldflags "$ldflags" -o $outputfile $compileflags $path
+      & $BUILDER build -ldflags "$ldflags" -o $outputfile $compileflags $path
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
         cyclonedx-gomod app -json -licenses -output $outputfile.bom.json -main $path .
