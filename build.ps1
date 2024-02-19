@@ -30,7 +30,7 @@ function BuildVariants {
       if ($currentos -eq "windows") {
         $outputfile += ".exe"
       }
-      garble -send=random -tiny build -ldflags "$ldflags" -o $outputfile $compileflags $path
+      garble -seed=random -tiny build -ldflags "$ldflags" -o $outputfile $compileflags $path
 
       if (Get-Command "cyclonedx-gomod" -ErrorAction SilentlyContinue)
       {
