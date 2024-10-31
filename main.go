@@ -420,8 +420,13 @@ func main() {
 	}
 
 	go func() {
+		dedupnames := make(map[string]struct{})
 		for username := range outputqueue {
-			fmt.Fprintln(output, username)
+			lcasename := strings.ToLower(username)
+			if _, found := dedupnames[lcasename]; !found {
+				fmt.Fprintln(output, username)
+				dedupnames[lcasename] = struct{}{}
+			}
 		}
 	}()
 
