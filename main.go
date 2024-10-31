@@ -419,8 +419,11 @@ func main() {
 		}
 	}
 
+	var outputWG sync.WaitGroup
+	dedupnames := make(map[string]struct{})
+	outputWG.Add(1)
+
 	go func() {
-		dedupnames := make(map[string]struct{})
 		for username := range outputqueue {
 			lcasename := strings.ToLower(username)
 			if _, found := dedupnames[lcasename]; !found {
@@ -428,6 +431,7 @@ func main() {
 				dedupnames[lcasename] = struct{}{}
 			}
 		}
+		outputWG.Done()
 	}()
 
 	var pb *progressbar.ProgressBar
@@ -459,4 +463,5 @@ func main() {
 
 	jobs.Wait()
 	close(outputqueue)
+	outputWG.Wait()
 }
