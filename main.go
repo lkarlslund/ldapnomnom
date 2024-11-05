@@ -416,9 +416,11 @@ func main() {
 						}
 
 						// Did we catch something?
-						res := response.Entries[0].Attributes[0].ByteValues[0]
-						if len(res) > 2 && res[0] == 0x17 && res[1] == 00 {
-							outputqueue <- username
+						if len(response.Entries) > 0 && len(response.Entries[0].Attributes) > 0 && len(response.Entries[0].Attributes[0].ByteValues) > 0 {
+							res := response.Entries[0].Attributes[0].ByteValues[0]
+							if len(res) > 2 && res[0] == 0x17 && res[1] == 00 {
+								outputqueue <- username
+							}
 						}
 
 						// Should we start a new connection to avoid detection
