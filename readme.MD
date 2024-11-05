@@ -2,9 +2,11 @@
 
 *Quietly and anonymously bruteforce Active Directory usernames at insane speeds from Domain Controllers by (ab)using LDAP Ping requests (cLDAP)*
 
-Looks for enabled normal user accounts. No Windows audit logs generated. High speed ~ up to 10K/sec - go beyond 25K/sec with multiple servers!
+Looks for enabled normal user accounts. No Windows audit logs generated. High speed ~ up to 50K/sec per server - go way beyond that with multiple servers in parallel!
 
 [![GitHub all releases](https://img.shields.io/github/downloads/lkarlslund/ldapnomnom/total)](https://github.com/lkarlslund/ldapnomnom/releases) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/lkarlslund/ldapnomnom/prerelease.yml?branch=main)
+
+![Highspeed bruteforcing using generated usernames](bruteforce-50k.png)
 
 - Tries to autodetect DC from environment variables on domain joined machines or falls back to machine hostname FQDN DNS suffix
 - Reads usernames to test from stdin (default) or file
