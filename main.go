@@ -56,6 +56,12 @@ func main() {
 
 	dumpDSE := flag.Bool("dump", false, "Just dump the rootDSE, no bruteforcing")
 
+	// bruteforce usernames
+	mode := flag.String("mode", "static", "password generator (static: read from file/stdin | generate: bruteforce len/charset)")
+	minlen := flag.Int("minlength", 1, "Minimum length of generated usernames")
+	maxlen := flag.Int("maxlength", 5, "Maximum length of generated usernames")
+	charset := flag.String("charset", "abcdefghijklmnopqrstuvwxyz0123456789.@", "Characters to use in bruteforcing")
+
 	// evasive maneuvers
 	throttle := flag.Int("throttle", 0, "Only do a request every N ms, 0 to disable")
 	maxrequests := flag.Int("maxrequests", 0, "Disconnect and reconnect a connection after n requests, 0 to disable")
@@ -87,7 +93,7 @@ func main() {
 
 	var pbmax int
 	input := os.Stdin
-	if *inputname != "" {
+	if *mode == "static" && *inputname != "" {
 		input, err = os.Open(*inputname)
 		if err != nil {
 			log.Fatalf("Can't open %v: %v", *inputname, err)
@@ -117,6 +123,12 @@ func main() {
 			input.Seek(0, io.SeekStart)
 			pb.Finish()
 		}
+	} else if *mode == "generate" {
+		for curlength := *minlen; curlength <= *maxlen; curlength++ {
+			sg := NewStringGen(*charset, curlength)
+			pbmax += int(sg.Complexity())
+		}
+		fmt.Printf("Generating %v usernames ranging in length from %v to %v\n", pbmax, *minlen, *maxlen)
 	}
 
 	names := bufio.NewScanner(input)
@@ -435,15 +447,16 @@ func main() {
 	}()
 
 	var pb *progressbar.ProgressBar
-	if pbmax != 0 {
+	if *outputname != "" && pbmax != 0 {
 		pb = progressbar.NewOptions(pbmax,
 			progressbar.OptionSetDescription("Usernames nom'ed"),
 			progressbar.OptionShowIts(),
 		)
 	}
 
-	go func() {
-		var line int
+	var line int
+	switch *mode {
+	case "static":
 		for names.Scan() {
 			if pb != nil && line%500 == 0 {
 				pb.Set(line)
@@ -458,8 +471,20 @@ func main() {
 			}
 			line++
 		}
-		close(inputqueue)
-	}()
+	case "generate":
+		for curlength := *minlen; curlength <= *maxlen; curlength++ {
+			sg := NewStringGen(*charset, curlength)
+			for sg.Next() {
+				inputqueue <- sg.String()
+				line++
+
+				if pb != nil && line%500 == 0 {
+					pb.Set(line)
+				}
+			}
+		}
+	}
+	close(inputqueue)
 
 	jobs.Wait()
 	close(outputqueue)
