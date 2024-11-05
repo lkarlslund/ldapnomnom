@@ -401,11 +401,18 @@ func main() {
 						)
 						response, err := conn.Search(request)
 						if err != nil {
-							if v, ok := err.(*ldap.Error); ok && v.ResultCode == 201 {
+							if v, ok := err.(*ldap.Error); ok {
+								if v.ResultCode == 201 {
+									continue
+								} else if v.ResultCode == 200 {
+									// network error
+									log.Print("lost LDAP connection, reconnecting\n")
+									conn.Close()
+									continue reconnectLoop
+								}
+								log.Printf("failed to execute search request: %v\n", err)
 								continue
 							}
-							log.Printf("failed to execute search request: %v", err)
-							continue
 						}
 
 						// Did we catch something?
