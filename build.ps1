@@ -42,7 +42,18 @@ function BuildVariants {
 
 Set-Location $PSScriptRoot
 
+$COMMIT = git rev-parse --short HEAD
+$VERSION = git describe --tags --exclude latest --exclude devbuild
+$DIRTYFILES = git status --porcelain
+$BUILDER = "go"
+
+if ("$DIRTYFILES" -ne "") {
+  $VERSION = "$VERSION-local-changes"
+}
+
+Write-Output "Building $VERSION"
+
+$LDFLAGS = "-X main.Version=$VERSION"
+
 # Release
 BuildVariants -ldflags "$LDFLAGS -s" -prefix ldapnomnom -path . -arch @("386", "amd64", "arm64") -os @("windows", "darwin", "linux")
-
-$env:GOGARBLE="github.com/lkarlslund"

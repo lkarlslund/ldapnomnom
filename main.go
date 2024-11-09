@@ -44,6 +44,8 @@ const banner = ` __    ____  _____ _____
 |  |__|  |  |     |   __|   | . |     |   | . |     |
 |_____|____/|__|__|__|  |_|_|___|_|_|_|_|_|___|_|_|_|`
 
+var Version string
+
 func main() {
 	server := flag.String("server", "", "Comma separated list of DCs to connect to, use IP or full hostname - will try autodection if not supplied")
 	dnsdomain := flag.String("dnsdomain", "", "Domain to connect to in DNS suffix format - will try autodection if not supplied")
@@ -70,12 +72,18 @@ func main() {
 	maxstrategy := flag.String("maxstrategy", "fastest", "How to select servers if more are found than wanted (fastest, random)")
 	parallel := flag.Int("parallel", 8, "How many connections per server to run in parallel")
 
+	flag.Parse()
+
+	if flag.Arg(0) == "version" {
+		fmt.Printf("LDAP Nom Nom %v\n", Version)
+		os.Exit(0)
+	}
+
 	fmt.Println(banner)
+	fmt.Printf("%v\n", Version)
 	fmt.Println()
 	fmt.Println("IN  SPACE  NO  ONE  CAN  HEAR  YOU  NOM  NOM  USERNAMES")
 	fmt.Println()
-
-	flag.Parse()
 
 	tlsmode, err := TLSmodeString(*tlsmodeString)
 	if err != nil {

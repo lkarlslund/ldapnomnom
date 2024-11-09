@@ -28,6 +28,12 @@ go install github.com/lkarlslund/ldapnomnom@latest
 ldapnomnom [--server dc1.domain.suffix[,dc2.domain.suffix] | --dnsdomain domain.suffix] [--port number] [--tlsmode notls|tls|starttls] [--input filename] [--output filename] [--parallel number-of-connections] [--maxservers number-of-servers] [--maxstrategy fastest|random] [--throttle n] [--maxrequests n]
 ```
 
+### Show version
+
+```bash
+ldapnomnom version
+```
+
 ### Bruteforcing examples
 
 Connect to up to 32 servers from contoso.local with 16 connections to each - FAAAAAAAST
